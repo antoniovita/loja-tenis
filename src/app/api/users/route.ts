@@ -49,6 +49,10 @@ const createUser = async (req: Request) => {
             }
         });
 
+        await prisma.cart.create({
+            data: { userId: body.id },
+        });
+
         return NextResponse.json(newUser);
     } catch (error) {
         return NextResponse.json({ error: "Erro ao criar usuário." }, { status: 500 });
