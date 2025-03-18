@@ -4,9 +4,11 @@ import { authenticate } from '@/middlewares/authMiddleware';
 
 const prisma = new PrismaClient();
 
-const getIdCart = async (req: NextRequest) => {
+//get cart 
+export const GET = async (req: NextRequest) => {
     const auth = await authenticate(req);
     if (auth instanceof NextResponse) return auth;
+
     try {
         const cart = await prisma.cart.findUnique({
             where: { userId: auth.id },
@@ -21,13 +23,15 @@ const getIdCart = async (req: NextRequest) => {
     }
 }
 
-const addCartItem = async (req: NextRequest) => {
+// add cart item
+export const POST = async (req: NextRequest) => {
     const auth = await authenticate(req);
     if (auth instanceof NextResponse) return auth;
+
     try {
         const { itemId, quantity } = await req.json();
-
         const cart = await prisma.cart.findUnique({ where: { userId: auth.id } });
+
         if (!cart) {
             return NextResponse.json({ error: "Carrinho não encontrado." }, { status: 404 });
         }
@@ -40,14 +44,13 @@ const addCartItem = async (req: NextRequest) => {
     }
 }
 
-const cartItemDelete = async (req: NextRequest) => {
+// delete cart item
+export const DELETE = async (req: NextRequest) => {
     const auth = await authenticate(req);
     if (auth instanceof NextResponse) return auth;
 
     try {
         const { cartItemId } = await req.json();
-
-        // Garantir que o item pertence ao carrinho do usuário autenticado
         const cartItem = await prisma.cartItem.findUnique({
             where: { id: cartItemId },
             include: { cart: true }
@@ -64,4 +67,3 @@ const cartItemDelete = async (req: NextRequest) => {
         return NextResponse.json({ error: "Erro ao remover item do carrinho." }, { status: 500 });
     }
 }
-

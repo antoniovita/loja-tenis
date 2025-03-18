@@ -17,4 +17,4 @@ export const authenticate = (req: NextRequest) => {
     }
 }
 
-module.exports = {authenticate}
+export default authenticate;
