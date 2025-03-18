@@ -7,11 +7,12 @@ import { authenticate } from '@/middlewares/authMiddleware';
 const prisma = new PrismaClient();
 const key = process.env.JWT_SECRET;
 
+// Rota para buscar usuários
 export const GET = async (req: NextRequest) => {
     const auth = await authenticate(req);
     if (auth instanceof NextResponse) return auth;
 
-    try { 
+    try {
         const users = await prisma.user.findMany();
         return NextResponse.json(users);
     } catch (error) {
@@ -19,27 +20,56 @@ export const GET = async (req: NextRequest) => {
     }
 };
 
+// Rota para registrar um novo usuário ou fazer login
 export const POST = async (req: NextRequest) => {
-    try { 
-        const body = await req.json();
-        const hashedPassword = await bcrypt.hash(body.password, 10);
-        
-        const newUser = await prisma.user.create({ 
-            data: {
-                name: body.name,
-                email: body.email,
-                password: hashedPassword 
+    const body = await req.json();
+
+    if (body.action === 'register') {
+        // Registro de usuário
+        try {
+            const hashedPassword = await bcrypt.hash(body.password, 10);
+
+            const newUser = await prisma.user.create({
+                data: {
+                    name: body.name,
+                    email: body.email,
+                    password: hashedPassword,
+                },
+            });
+
+            await prisma.cart.create({ data: { userId: newUser.id } });
+
+            return NextResponse.json({ success: true, user: newUser });
+        } catch (error) {
+            return NextResponse.json({ error: "Erro ao criar usuário." }, { status: 500 });
+        }
+    } else if (body.action === 'login') {
+        // Login de usuário
+        try {
+            const user = await prisma.user.findUnique({ where: { email: body.email } });
+
+            if (!user) {
+                return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
             }
-        });
 
-        await prisma.cart.create({ data: { userId: newUser.id } });
+            const match = await bcrypt.compare(body.password, user.password);
 
-        return NextResponse.json(newUser);
-    } catch (error) {
-        return NextResponse.json({ error: "Erro ao criar usuário." }, { status: 500 });
+            if (!match) {
+                return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
+            }
+
+            const token = jwt.sign({ id: user.id, email: user.email }, key, { expiresIn: '1h' });
+
+            return NextResponse.json({ message: "Login realizado com sucesso!", token, user });
+        } catch (error) {
+            return NextResponse.json({ error: "Erro ao fazer login." }, { status: 500 });
+        }
+    } else {
+        return NextResponse.json({ error: "Ação inválida. Use 'register' ou 'login'." }, { status: 400 });
     }
 };
 
+// Rota para deletar um usuário
 export const DELETE = async (req: NextRequest) => {
     const auth = await authenticate(req);
     if (auth instanceof NextResponse) return auth;
@@ -54,31 +84,9 @@ export const DELETE = async (req: NextRequest) => {
     }
 };
 
-export const loginUser = async (req: NextRequest) => {
-    try {
-        const body = await req.json();
-        const user = await prisma.user.findUnique({ where: { email: body.email } });
-
-        if (!user) {
-            return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
-        }
-
-        const match = await bcrypt.compare(body.password, user.password);
-        
-        if (!match) {
-            return NextResponse.json({ error: "Senha inválida." }, { status: 401 });
-        }
-
-        const token = jwt.sign({ id: user.id, email: user.email }, key, { expiresIn: '1h' });
-
-        return NextResponse.json({ message: "Login realizado com sucesso!", token, user });
-    } catch (error) {
-        return NextResponse.json({ error: "Erro ao fazer login." }, { status: 500 });
-    }
-};
-
+// Rota para buscar um usuário pelo ID
 export const getUserById = async (req: NextRequest) => {
-    try { 
+    try {
         const body = await req.json();
         const user = await prisma.user.findUnique({ where: { id: body.id } });
 
