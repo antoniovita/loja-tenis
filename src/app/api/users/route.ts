@@ -7,25 +7,10 @@ import { authenticate } from '@/middlewares/authMiddleware';
 const prisma = new PrismaClient();
 const key = process.env.JWT_SECRET;
 
-// Rota para buscar usuários
-export const GET = async (req: NextRequest) => {
-    const auth = await authenticate(req);
-    if (auth instanceof NextResponse) return auth;
-
-    try {
-        const users = await prisma.user.findMany();
-        return NextResponse.json(users);
-    } catch (error) {
-        return NextResponse.json({ error: "Erro ao buscar usuários." }, { status: 500 });
-    }
-};
-
-// Rota para registrar um novo usuário ou fazer login
 export const POST = async (req: NextRequest) => {
     const body = await req.json();
 
     if (body.action === 'register') {
-        // Registro de usuário
         try {
             const hashedPassword = await bcrypt.hash(body.password, 10);
 
@@ -44,7 +29,7 @@ export const POST = async (req: NextRequest) => {
             return NextResponse.json({ error: "Erro ao criar usuário." }, { status: 500 });
         }
     } else if (body.action === 'login') {
-        // Login de usuário
+
         try {
             const user = await prisma.user.findUnique({ where: { email: body.email } });
 
@@ -69,7 +54,6 @@ export const POST = async (req: NextRequest) => {
     }
 };
 
-// Rota para deletar um usuário
 export const DELETE = async (req: NextRequest) => {
     const auth = await authenticate(req);
     if (auth instanceof NextResponse) return auth;
@@ -84,8 +68,7 @@ export const DELETE = async (req: NextRequest) => {
     }
 };
 
-// Rota para buscar um usuário pelo ID
-export const getUserById = async (req: NextRequest) => {
+export const GET = async (req: NextRequest) => {
     try {
         const body = await req.json();
         const user = await prisma.user.findUnique({ where: { id: body.id } });

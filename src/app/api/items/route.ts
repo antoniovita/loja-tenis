@@ -74,7 +74,16 @@ export const POST = async (req: NextRequest) => {
             return NextResponse.json({ error: "Usuário não autorizado." }, { status: 401 });
         }
 
-        const body = await req.json();
+        // Lê o corpo da requisição como texto para verificar possíveis erros de formatação
+        const text = await req.text();
+        let body;
+        try {
+            body = JSON.parse(text);
+        } catch (jsonError) {
+            console.error("Erro ao fazer parse do JSON. Texto recebido:", text);
+            return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
+        }
+
         if (!body.name || !body.price) {
             return NextResponse.json({ error: "Campos obrigatórios: name e price." }, { status: 400 });
         }
@@ -89,6 +98,7 @@ export const POST = async (req: NextRequest) => {
 
         return NextResponse.json({ success: true, item });
     } catch (error) {
+        console.error("Erro ao criar o produto:", error);
         return NextResponse.json({ error: "Erro ao criar o produto." }, { status: 500 });
     }
 };

@@ -28,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex flex-row justify-between px-5 py-4 bg-sky-800 text-white">
+        <div className="flex flex-row justify-between px-7 py-8 bg-sky-800 text-white">
           <h1> Imagem </h1>
           <div className="flex flex-row gap-6"> 
             <h1> Entrar </h1>
