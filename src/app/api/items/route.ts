@@ -9,27 +9,32 @@ const key = process.env.JWT_SECRET;
 
 const getItems = async () => {
     try {
-        const items = await prisma.items.findMany()
-        return NextResponse.json(items)
+        const items = await prisma.item.findMany();
+        return NextResponse.json(items);
     } catch (error) {
-        return NextResponse.json({message: 'Erro ao buscar items.'})
+        return NextResponse.json({ message: "Erro ao buscar itens." }, { status: 500 });
     }
-}
+};
 
+
+//rota get usando searchparams
 const getItemById = async (req: NextRequest) => {
     try {    
-        const body = await req.json();
-        const items = await prisma.items.findUnique({where: {id: body.id}})
+        const { searchParams } = new URL(req.url);
+        const itemId = searchParams.get("id");
 
-        if (!items) {
-            return NextResponse.json({message: "Produto não encontrado."})
-        } {status: 404}
-
-        return NextResponse.json(items)
+        if (!itemId) {
+            return NextResponse.json({ message: "ID do produto é necessário." }, { status: 400 });
+        }
+        const item = await prisma.item.findUnique({ where: { id: itemId } });
+        if (!item) {
+            return NextResponse.json({ message: "Produto não encontrado." }, { status: 404 });
+        }
+        return NextResponse.json(item);
     } catch (error) {
-        return NextResponse.json({error: "Erro na busca por id."})
+        return NextResponse.json({ error: "Erro na busca por ID." }, { status: 500 });
     }
-}
+};
 
 //rota protegida
 const deleteItem = async (req: NextRequest) => {

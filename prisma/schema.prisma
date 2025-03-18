@@ -10,7 +10,7 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  name      String   @unique
+  name      String   
   password  String
   cart      Cart[]
   orders    Order[]
@@ -20,7 +20,7 @@ model User {
 
 model Cart {
   id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String   @unique
   items     CartItem[]
   createdAt DateTime @default(now())
@@ -29,9 +29,9 @@ model Cart {
 
 model CartItem {
   id        String @id @default(cuid())
-  cart      Cart   @relation(fields: [cartId], references: [id])
+  cart      Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
   cartId    String
-  item      Item   @relation(fields: [itemId], references: [id])
+  item      Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
   itemId    String
   quantity  Int
 }
@@ -68,7 +68,7 @@ model Order {
 
 model OrderItem {
   id       String @id @default(cuid())
-  order    Order  @relation(fields: [orderId], references: [id])
+  order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId  String
   item     Item   @relation(fields: [itemId], references: [id])
   itemId   String

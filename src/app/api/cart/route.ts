@@ -1,34 +1,67 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { authenticate } from '@/middlewares/authMiddleware'; 
 
 const prisma = new PrismaClient();
 
-// Buscar carrinho do usuário
-const getCart = async (req: NextRequest) => {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
+const getIdCart = async (req: NextRequest) => {
+    const auth = await authenticate(req);
+    if (auth instanceof NextResponse) return auth;
+    try {
+        const cart = await prisma.cart.findUnique({
+            where: { userId: auth.id },
+            include: { items: true }
+        });
 
-    if (!userId) return NextResponse.json({ error: "userId obrigatório." }, { status: 400 });
-
-    const cart = await prisma.cart.findUnique({ where: { userId }, include: { items: true } });
-
-    return cart ? NextResponse.json(cart) : NextResponse.json({ error: "Carrinho não encontrado." }, { status: 404 });
+        return cart
+            ? NextResponse.json(cart)
+            : NextResponse.json({ error: "Carrinho não encontrado." }, { status: 404 });
+    } catch (error) {
+        return NextResponse.json({ error: "Erro ao buscar o carrinho." }, { status: 500 });
+    }
 }
 
-// Adicionar item ao carrinho
-export async function PUT(req: NextRequest) {
-    const { cartId, itemId, quantity } = await req.json();
+const addCartItem = async (req: NextRequest) => {
+    const auth = await authenticate(req);
+    if (auth instanceof NextResponse) return auth;
+    try {
+        const { itemId, quantity } = await req.json();
 
-    await prisma.cartItem.create({ data: { cartId, itemId, quantity } });
+        const cart = await prisma.cart.findUnique({ where: { userId: auth.id } });
+        if (!cart) {
+            return NextResponse.json({ error: "Carrinho não encontrado." }, { status: 404 });
+        }
 
-    return NextResponse.json({ message: "Item adicionado ao carrinho!" });
+        await prisma.cartItem.create({ data: { cartId: cart.id, itemId, quantity } });
+
+        return NextResponse.json({ message: "Item adicionado ao carrinho!" });
+    } catch (error) {
+        return NextResponse.json({ error: "Erro ao adicionar item ao carrinho." }, { status: 500 });
+    }
 }
 
-// Remover item do carrinho
-export async function DELETE(req: NextRequest) {
-    const { cartItemId } = await req.json();
+const cartItemDelete = async (req: NextRequest) => {
+    const auth = await authenticate(req);
+    if (auth instanceof NextResponse) return auth;
 
-    await prisma.cartItem.delete({ where: { id: cartItemId } });
+    try {
+        const { cartItemId } = await req.json();
 
-    return NextResponse.json({ message: "Item removido do carrinho!" });
+        // Garantir que o item pertence ao carrinho do usuário autenticado
+        const cartItem = await prisma.cartItem.findUnique({
+            where: { id: cartItemId },
+            include: { cart: true }
+        });
+
+        if (!cartItem || cartItem.cart.userId !== auth.id) {
+            return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
+        }
+
+        await prisma.cartItem.delete({ where: { id: cartItemId } });
+
+        return NextResponse.json({ message: "Item removido do carrinho!" });
+    } catch (error) {
+        return NextResponse.json({ error: "Erro ao remover item do carrinho." }, { status: 500 });
+    }
 }
+
