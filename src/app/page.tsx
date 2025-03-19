@@ -9,7 +9,8 @@ const Home = () => {
   return ( 
     <div className="flex flex-col justify-center">
       <HomeCarousel></HomeCarousel>
-      <ProductsSection categoryId='1'></ProductsSection>
+      <ProductsSection categoryId='1' categoryName='Nike SB'></ProductsSection>
+      <ProductsSection categoryId='2' categoryName='Dunk'></ProductsSection>
     </div>
   );
 }

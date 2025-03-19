@@ -14,9 +14,10 @@ interface Product {
 
 interface ProductsSectionProps {
   categoryId: string;
+  categoryName: string,
 }
 
-const ProductsSection = ({ categoryId }: ProductsSectionProps) => {
+const ProductsSection = ({ categoryId, categoryName }: ProductsSectionProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -36,7 +37,7 @@ const ProductsSection = ({ categoryId }: ProductsSectionProps) => {
 
   return (
     <div className="flex flex-col justify-center items-center py-10 w-full">
-      <h1 className="text-3xl font-bold mb-6"> Categoria X</h1>
+      <h1 className="text-3xl font-bold mb-6"> {categoryName}</h1>
       {loading ? (
         <p>Carregando...</p>
       ) : (

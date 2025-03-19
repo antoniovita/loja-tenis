@@ -1,7 +1,8 @@
 const SalesSection = () => {
-    return (
-        
-    <div>
+    
+
+    return (    
+    <div className="">
 
 
     </div> 

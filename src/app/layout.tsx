@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CategoryBar from "../components/categorybar";
+import Link from "next/link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,10 +30,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="flex flex-row justify-between px-7 py-8 bg-sky-800 text-white">
-          <h1> Imagem </h1>
+          <Link href={'/'}> Imagem inicial </Link>
           <div className="flex flex-row gap-6"> 
-            <h1> Entrar </h1>
-            <h1> Carrinho </h1>
+            <Link href='login'> Entrar </Link>
+            <Link href={'cart'}> Carrinho </Link>
           </div>
         </div>
         <CategoryBar></CategoryBar>

@@ -8,20 +8,20 @@ const prisma = new PrismaClient();
 export const GET = async (req: NextRequest) => {
     const auth = await authenticate(req);
     if (auth instanceof NextResponse) return auth;
-
+  
     try {
-        const cart = await prisma.cart.findUnique({
-            where: { userId: auth.id },
-            include: { items: true }
-        });
-
-        return cart
-            ? NextResponse.json(cart)
-            : NextResponse.json({ error: "Carrinho não encontrado." }, { status: 404 });
+      const cart = await prisma.cart.findUnique({
+        where: { userId: auth.id },
+        include: { items: true }
+      });
+  
+      return cart
+        ? NextResponse.json(cart)
+        : NextResponse.json({ error: "Carrinho não encontrado." }, { status: 404 });
     } catch (error) {
-        return NextResponse.json({ error: "Erro ao buscar o carrinho." }, { status: 500 });
+      return NextResponse.json({ error: "Erro ao buscar o carrinho." }, { status: 500 });
     }
-}
+  };
 
 // add cart item
 export const POST = async (req: NextRequest) => {
