@@ -12,13 +12,17 @@ interface Product {
   price: number;
 }
 
-const ProductsSection = () => {
+interface ProductsSectionProps {
+  categoryId: string;
+}
+
+const ProductsSection = ({ categoryId }: ProductsSectionProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     axios
-      .get("/api/items")
+      .get(`/api/category?id=${categoryId}`)
       .then((res) => {
         setProducts(res.data);
       })
@@ -28,11 +32,11 @@ const ProductsSection = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [categoryId]);
 
   return (
     <div className="flex flex-col justify-center items-center py-10 w-full">
-      <h1 className="text-3xl font-bold mb-6">Produtos</h1>
+      <h1 className="text-3xl font-bold mb-6"> Categoria X</h1>
       {loading ? (
         <p>Carregando...</p>
       ) : (
