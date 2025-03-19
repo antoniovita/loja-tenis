@@ -74,7 +74,6 @@ export const POST = async (req: NextRequest) => {
             return NextResponse.json({ error: "Usuário não autorizado." }, { status: 401 });
         }
 
-        // Lê o corpo da requisição como texto para verificar possíveis erros de formatação
         const text = await req.text();
         let body;
         try {
