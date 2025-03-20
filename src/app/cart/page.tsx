@@ -17,13 +17,28 @@ const CartPage = () => {
     const [products, setProducts] = useState<Product[]>([]);
 
     useEffect(() => {
-        axios.get('/api/cart')
-            .then((res) => {
+        const fetchCart = async () => {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                console.error("Token não encontrado. Usuário não autenticado.");
+                return;
+            }
+
+            try {
+                const res = await axios.get('/api/cart', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
                 setProducts(res.data.items || res.data);
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error("Erro ao buscar produtos do carrinho:", error);
-            });
+            }
+        };
+
+        fetchCart();
     }, []);
 
     return (
@@ -46,7 +61,7 @@ const CartPage = () => {
                                 <div>
                                     <h1 className="text-lg font-semibold">{product.name}</h1>
                                     <h2 className="text-md text-gray-700">
-                                        R$ {product.price.toFixed(2)}
+                                        R$ {product.price}
                                     </h2>
                                 </div>
                             </div>

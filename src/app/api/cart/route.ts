@@ -11,7 +11,7 @@ export const GET = async (req: NextRequest) => {
   
     try {
       const cart = await prisma.cart.findUnique({
-        where: { userId: auth.id },
+        where: { userId: typeof auth === 'object' && 'id' in auth ? auth.id : undefined },
         include: { items: true }
       });
   
@@ -70,7 +70,7 @@ export const DELETE = async (req: NextRequest) => {
             include: { cart: true }
         });
 
-        if (!cartItem || cartItem.cart.userId !== auth.id) {
+        if (!cartItem || typeof auth !== 'object' || !('id' in auth) || cartItem.cart.userId !== auth.id) {
             return NextResponse.json({ error: "Acesso negado." }, { status: 403 });
         }
 
