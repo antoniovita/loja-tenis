@@ -81,14 +81,3 @@ export const DELETE = async (req: NextRequest) => {
         return NextResponse.json({ error: "Erro ao remover item do carrinho." }, { status: 500 });
     }
 }
-
-export const PUT = async (req: NextRequest) => {
-    const auth = await authenticate(req);
-    if (auth instanceof NextResponse) return auth;
-
-    try {
-
-    } catch (error) {
-        return NextResponse.json(error)
-    }
-}
