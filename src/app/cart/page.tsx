@@ -1,16 +1,12 @@
 'use client'
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/free-mode";
-import "swiper/css/pagination";
-import { FreeMode, Pagination } from "swiper/modules";
 
 interface Product {
-    id: string;
+    id: string; 
     name: string;
     price: number;
+    quantity: number;
 }
 
 const CartPage = () => {
@@ -32,7 +28,25 @@ const CartPage = () => {
                     }
                 });
 
-                setProducts(res.data.items || res.data);
+                console.log("Resposta completa da API:", res.data);
+
+                if (!res.data.items || !Array.isArray(res.data.items)) {
+                    console.error("A chave 'items' não é um array ou não foi encontrada.");
+                    return;
+                }
+
+                const formattedProducts = res.data.items.map((cartItem: any) => {
+
+                    return {
+                        id: cartItem.item.id,
+                        name: cartItem.item.name,
+                        price: cartItem.item.price,
+                        quantity: cartItem.quantity,
+                    };
+                });
+
+                console.log("Produtos formatados:", formattedProducts);
+                setProducts(formattedProducts);
             } catch (error) {
                 console.error("Erro ao buscar produtos do carrinho:", error);
             }
@@ -47,27 +61,24 @@ const CartPage = () => {
             {products.length === 0 ? (
                 <p>Seu carrinho está vazio.</p>
             ) : (
-                <Swiper
-                    modules={[FreeMode, Pagination]}
-                    freeMode={true}
-                    pagination={{ clickable: true }}
-                    spaceBetween={20}
-                    slidesPerView="auto"
-                    className="w-full px-4"
-                >
-                    {products.map((product) => (
-                        <SwiperSlide key={product.id} className="w-[250px] max-w-sm">
-                            <div className="h-[300px] bg-gray-100 p-4 flex flex-col justify-between rounded-xl shadow-lg">
-                                <div>
-                                    <h1 className="text-lg font-semibold">{product.name}</h1>
-                                    <h2 className="text-md text-gray-700">
-                                        R$ {Number(product.price)}
-                                    </h2>
+                <div className="flex flex-col gap-5">
+                    {products.map((product, index) => (
+                        <div key={index} className="w-300 h-24 items-center bg-gray-100 px-8 flex flex-row justify-between rounded-lg shadow-md">
+                            <div className="flex flex-row gap-8">
+                                <h1 className="w-16 h-16 bg-gray-300 flex items-center justify-center text-gray-500">IMG</h1>
+                                <h1 className="mt-4 text-lg font-semibold text-gray-700">{product.name}</h1>
+                            </div>
+                            <div className="flex flex-row gap-6">
+                                <h2 className="text-md text-gray-700">R$ {Number(product.price).toFixed(2)}</h2>
+                                <div className="flex flex-row gap-3 px-2 rounded-2xl items-center justify-center bg-zinc-500">
+                                    <button className="text-lg text-white"> + </button>
+                                    <p className="text-lg text-white"> {product.quantity}</p>
+                                    <button className="text-lg text-white"> - </button>
                                 </div>
                             </div>
-                        </SwiperSlide>
+                        </div>
                     ))}
-                </Swiper>
+                </div>
             )}
         </div>
     );

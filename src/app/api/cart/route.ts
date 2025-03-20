@@ -12,7 +12,7 @@ export const GET = async (req: NextRequest) => {
     try {
       const cart = await prisma.cart.findUnique({
         where: { userId: typeof auth === 'object' && 'id' in auth ? auth.id : undefined },
-        include: { items: true }
+        include: { items: { include: {item: true} } }
       });
   
       return cart
@@ -79,5 +79,16 @@ export const DELETE = async (req: NextRequest) => {
         return NextResponse.json({ message: "Item removido do carrinho!" });
     } catch (error) {
         return NextResponse.json({ error: "Erro ao remover item do carrinho." }, { status: 500 });
+    }
+}
+
+export const PUT = async (req: NextRequest) => {
+    const auth = await authenticate(req);
+    if (auth instanceof NextResponse) return auth;
+
+    try {
+
+    } catch (error) {
+        return NextResponse.json(error)
     }
 }
