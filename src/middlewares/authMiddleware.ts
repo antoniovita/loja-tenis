@@ -5,7 +5,7 @@ export const authenticate = (req: NextRequest) => {
     try {
         const authHeader = req.headers.get('Authorization');
         if (!authHeader || !authHeader.startsWith('Bearer')) {
-            return NextResponse.json({error: "Rota desautorizada."}, {status: 401});
+            return NextResponse.json({ error: "Rota desautorizada." }, { status: 401 });
         }
 
         const token = authHeader.split(' ')[1];
@@ -13,8 +13,9 @@ export const authenticate = (req: NextRequest) => {
 
         return decoded;
     } catch (error) {
-        return NextResponse.json( { error: "Token inválido." }), {status: 403};
-    }
+        console.error("Erro na autenticação:", error);
+        return NextResponse.json({ error: "Token inválido." }, { status: 403 });
+}
 }
 
 export default authenticate;

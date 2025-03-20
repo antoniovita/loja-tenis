@@ -12,13 +12,19 @@ export const GET = async (req: NextRequest) => {
         const categoryId = searchParams.get("id");
 
         if (categoryId) {
-            const items = await prisma.item.findMany({ where: { categoryId } });
-             if (items.length === 0) {
+            const category = await prisma.category.findUnique({
+                where: { id: categoryId },
+            });
+
+            if (!category) {
                 return NextResponse.json({ message: "Categoria não encontrada." }, { status: 404 });
             }
-            return NextResponse.json(items);
+            const items = await prisma.item.findMany({ where: { categoryId } });
+            return NextResponse.json({
+                category: category.name,
+                items,
+            });
         }
-
         const allItems = await prisma.item.findMany();
         return NextResponse.json(allItems);
     } catch (error) {

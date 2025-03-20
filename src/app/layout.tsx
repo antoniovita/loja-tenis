@@ -32,7 +32,7 @@ export default function RootLayout({
         <div className="flex flex-row justify-between px-7 py-8 bg-sky-800 text-white">
           <Link href={'/'}> Imagem inicial </Link>
           <div className="flex flex-row gap-6"> 
-            <Link href='login'> Entrar </Link>
+            <Link href={'login'}> Entrar </Link>
             <Link href={'cart'}> Carrinho </Link>
           </div>
         </div>

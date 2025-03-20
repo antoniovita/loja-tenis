@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { authenticate } from '@/middlewares/authMiddleware'; 
+import { authenticate } from '../../../middlewares/authMiddleware'; 
 
 const prisma = new PrismaClient();
 
@@ -25,24 +25,38 @@ export const GET = async (req: NextRequest) => {
 
 // add cart item
 export const POST = async (req: NextRequest) => {
-    const auth = await authenticate(req);
-    if (auth instanceof NextResponse) return auth;
-
     try {
-        const { itemId, quantity } = await req.json();
-        const cart = await prisma.cart.findUnique({ where: { userId: auth.id } });
+        const text = await req.text();
+        let body;
+        try {
+            body = JSON.parse(text);
+        } catch (jsonError) {
+            console.error("Erro ao fazer parse do JSON. Texto recebido:", text);
+            return NextResponse.json({ error: "JSON inválido." }, { status: 400 });
+        }
+        
+        const { userId, itemId, quantity } = body;
+        const cart = await prisma.cart.findUnique({ where: { userId } });
 
         if (!cart) {
             return NextResponse.json({ error: "Carrinho não encontrado." }, { status: 404 });
         }
 
-        await prisma.cartItem.create({ data: { cartId: cart.id, itemId, quantity } });
+        const item = await prisma.cartItem.create({
+            data: {
+                cartId: cart.id,
+                itemId,
+                quantity,
+            },
+        });
 
-        return NextResponse.json({ message: "Item adicionado ao carrinho!" });
+        return NextResponse.json({ success: true, item });
     } catch (error) {
-        return NextResponse.json({ error: "Erro ao adicionar item ao carrinho." }, { status: 500 });
+        console.error("Erro ao criar o produto:", error);
+        return NextResponse.json({ error: "Erro ao criar o produto." }, { status: 500 });
     }
-}
+};
+
 
 // delete cart item
 export const DELETE = async (req: NextRequest) => {

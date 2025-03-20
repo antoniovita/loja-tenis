@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useRouter } from 'next/navigation'
 import Link from "next/link";
 
-const LoginPage = () => {
+const RegisterPage = () => {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string>('');
+    const [name, setName] = useState<string>('');
     const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -15,11 +16,12 @@ const LoginPage = () => {
     setError('');
     try {
       const response = await axios.post('/api/users', {
-        action: 'login',
+        action: 'register',
         email,
         password,
+        name,
       });
-      console.log("Login realizado com sucesso:", response.data);
+      console.log("Registro realizado com sucesso:", response.data);
       router.push('/')
 
       const token = response.data.token;
@@ -28,17 +30,25 @@ const LoginPage = () => {
       }
 
     } catch (err: any) {
-      console.error("Erro no login:", err.response?.data || err);
-      setError(err.response?.data?.error || "Erro ao fazer login.");
+      console.error("Erro no registro:", err.response?.data || err);
+      setError(err.response?.data?.error || "Erro ao fazer registro.");
     }
   };
 
   return (
     <div className="min-h-[800px] flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+        <input
+            type="name"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="p-2 border border-gray-300 rounded"
+          />
           <input
             type="email"
             placeholder="Email"
@@ -59,13 +69,13 @@ const LoginPage = () => {
             type="submit"
             className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
           >
-            Login
+            Register
           </button>
         </form>
-        <Link href={'register'}> <button className="py-5 font-thin text-blue-900" > Ainda não possui login? Clique aqui para se registrar! </button></Link>
+        <Link href={'login'}> <button className="py-5 font-thin text-blue-900" > Já possui login? Clique aqui para logar! </button></Link>
       </div>
     </div>
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

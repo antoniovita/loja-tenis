@@ -19,8 +19,6 @@ const CartPage = () => {
     useEffect(() => {
         axios.get('/api/cart')
             .then((res) => {
-                // Supondo que o endpoint retorne o carrinho com a propriedade `items`
-                // Caso retorne uma array diretamente, utilize res.data
                 setProducts(res.data.items || res.data);
             })
             .catch((error) => {
